@@ -2,6 +2,7 @@
 #include <cstdlib>
 #include <string>
 #include <fstream>
+#include <vector>
 #include <iomanip> 
 #include "sculptor.h"
 
@@ -124,6 +125,7 @@ int main() {
     for (int i = 0; i < figs.size(); i++) {
       delete figs[i];
     }
+
     delete s1;
     
 

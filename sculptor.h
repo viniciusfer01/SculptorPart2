@@ -17,16 +17,6 @@ public:
   void draw(Sculptor &s);
 };
 
-PutVoxel::PutVoxel(int x, int y, int z, float r, float g, float b, float a){
-  this->x=x; this->y=y; this->z=z;
-  this->r=r; this->g=g; this->b=b; this->a=a;
-}
-
-void PutVoxel::draw(Sculptor &s){
-  s.setColor(r,g,b,a);
-  s.putVocel(x,y,z);
-}
-
 class FiguraGeometrica{
   protected:
     float r,g,b,a;
@@ -34,6 +24,129 @@ class FiguraGeometrica{
     virtual ~FiguraGeometrica(){};
     virtual void draw(Sculptor &s)=0;
 };
+
+PutVoxel::PutVoxel(int x, int y, int z, float r, float g, float b, float a){
+  this->x=x; this->y=y; this->z=z;
+  this->r=r; this->g=g; this->b=b; this->a=a;
+}
+
+void PutVoxel::draw(Sculptor &s){
+  s.setColor(r,g,b,a);
+  s.putVoxel(x,y,z);
+}
+
+PutSphere::PutSphere(int xc, int yc, int zc, int radius, float r, float g, float b, float a){
+  this->xc = xc; this ->yc = yc; this-> zc = zc; this->radius = radius; this->r = r; this -> g;
+  this->b = b; this->a =a;
+}
+
+void PutSphere::draw(Sculptor &s){
+  double calc;
+  int x, y, z;
+  calc = radius*radius;
+  s.setColor(r,g,b,a);
+  for(x=xc-radius; x<xc+radius; x++){
+    for(y=yc-radius; y<yc+radius; y++){
+      for(z=zc-radius; z<zc+radius; z++){
+        if(static_cast<double>(x-xc)*static_cast<double>(x-xc)+
+           static_cast<double>(y-yc)*static_cast<double>(y-yc)+
+           static_cast<double>(z-zc)*static_cast<double>(z-zc) < calc
+           ) 
+        {
+             s.putVoxel(x,y,z);
+        }
+      }
+    }
+  }
+}
+
+PutBox::~PutBox(){
+  std::cout << "destuctor PutBox\n";
+}
+
+void PutBox::draw(Sculptor &s) {
+  int x, y, z;
+  s.setColor(r,g,b,a);
+  if (x0 > x1)
+  {
+    troca(x0, x1);
+  }
+  if (y0 > y1)
+  {
+    troca(y0, y1);
+  }
+  if (z0 > z1)
+  {
+    troca(z0, z1);
+  }
+  if(x0 < 0) {
+    x0 = 0;
+  }
+  for (x=x0; x<=x1;x++){
+    for (y=y0; y<=y1;y++){
+      for (z=z0; z<=z1;z++){
+        s.putVoxel(x,y,z);
+      }
+    }
+  }
+  
+}
+
+Interpretador::Interpretador(){
+
+}
+
+std::vector<FiguraGeometrica*> Interpretador::parse(std::string filename) {
+  std::vector<FiguraGeometrica*> figs;
+  std::ifstream fin;
+  std::stringstream ss;
+  std::string s, token;
+
+  fin.open(filename.c_str());
+  if(!fin.is_open()){
+    std::cout << "o fluxo nao abriu 😪" << filename << std::endl;
+    exit(0);
+  }
+
+  while (fin.good())
+  {
+    std::getline(fin, s);
+    if(fin.good()){
+      ss.clear();
+      ss.str(s);
+      ss >> token;
+      if(ss.good()){
+        if(token.compare("dim") == 0){
+          ss >> dimx >> dimy >> dimz;
+        }
+
+        else if(token.compare("putvoxel") == 0){
+          int x0, y0, z0;
+          ss >> x0 >> y0 >> z0 >> r >> g >> b >> a;
+          figs.push_back(new PutVoxel(x0, y0, z0, r, g, b, a));
+        }
+        else if(token.compare("putsphere") == 0){
+          int x0, y0, z0, rr;
+          ss >> x0 >> y0 >> z0 >> rr >> r >> g >> b >> a;
+          figs.push_back(new PutVoxel(x0, y0, z0, rr, r, g, b, a));
+        }
+      }
+    }
+  }
+  return(figs);
+}
+
+int Interpretador::getDimx(){
+  return dimx;
+}
+
+int Interpretador::getDimy(){
+  return dimy;
+}
+
+int Interpretador::getDimz(){
+  return dimz;
+}
 
 //estrutura para os blocos.
 struct Voxel {
